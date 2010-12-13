@@ -45,7 +45,7 @@ class KvmTest(test.test):
         envobj = kvm.env.KvmEnv(env)
         env = envobj.data # reference the dict kept by KvmEnv, as the original 'env' dict won't be changed by KvmEnv
 
-        logging.debug("Contents of environment: %s", env)
+        logging.debug("Contents of environment: %s", envobj)
 
         test_passed = False
 
@@ -101,7 +101,7 @@ class KvmTest(test.test):
                                       "postprocessing: %s", e)
                 finally:
                     envobj.dump(env_filename)
-                    logging.debug("Contents of environment: %s", env)
+                    logging.debug("Contents of environment: %s", envobj)
 
         except Exception, e:
             if params.get("abort_on_error") != "yes":
