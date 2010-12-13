@@ -68,7 +68,7 @@ class KvmTest(test.test):
 
                     # Preprocess
                     try:
-                        kvm_preprocessing.preprocess(self, params, env)
+                        kvm_preprocessing.preprocess(self, params, envobj)
                     finally:
                         envobj.dump(env_filename)
                     # Run the test function
@@ -84,7 +84,7 @@ class KvmTest(test.test):
                                   e.__class__.__name__, e)
                     try:
                         kvm_preprocessing.postprocess_on_error(
-                            self, params, env)
+                            self, params, envobj)
                     finally:
                         envobj.dump(env_filename)
                     raise
@@ -93,7 +93,7 @@ class KvmTest(test.test):
                 # Postprocess
                 try:
                     try:
-                        kvm_preprocessing.postprocess(self, params, env)
+                        kvm_preprocessing.postprocess(self, params, envobj)
                     except Exception, e:
                         if test_passed:
                             raise
