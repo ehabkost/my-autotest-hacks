@@ -41,7 +41,7 @@ class KvmTest(test.test):
                      "messages.")
         env_filename = os.path.join(self.bindir, params.get("env", "env"))
 
-        env = kvm_utils.load_env(env_filename, self.env_version)
+        env = kvm.env.load_env(env_filename, self.env_version)
         envobj = kvm.env.KvmEnv(env)
         env = envobj.data # reference the dict kept by KvmEnv, as the original 'env' dict won't be changed by KvmEnv
 

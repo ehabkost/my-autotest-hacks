@@ -27,30 +27,6 @@ def _unlock_file(f):
     f.close()
 
 
-def load_env(filename, version):
-    """
-    Load KVM test environment from an env file.
-    If the version recorded in the file is lower than version, return an empty
-    env.  If some other error occurs during unpickling, return an empty env.
-
-    @param filename: Path to an env file.
-    """
-    default = {"version": version}
-    try:
-        file = open(filename, "r")
-        env = cPickle.load(file)
-        file.close()
-        if env.get("version", 0) < version:
-            logging.warn("Incompatible env file found. Not using it.")
-            return default
-        return env
-    # Almost any exception can be raised during unpickling, so let's catch
-    # them all
-    except Exception, e:
-        logging.warn(e)
-        return default
-
-
 def get_sub_dict(dict, name):
     """
     Return a "sub-dict" corresponding to a specific object.
