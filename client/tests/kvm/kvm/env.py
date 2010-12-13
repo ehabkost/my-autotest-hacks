@@ -13,9 +13,14 @@ class KvmEnv(UserDict.IterableUserDict):
         UserDict.IterableUserDict.__init__(self, d)
 
     def dump(self, filename):
-        """Save env to a file using pickle"""
-        dump_env(self.data, filename)
+        """
+        Dump KVM test environment to a file.
 
+        @param filename: Path to a file where the environment will be dumped to.
+        """
+        file = open(filename, "w")
+        cPickle.dump(self.data, file)
+        file.close()
 
 def load_env(filename, version):
     """
@@ -39,13 +44,3 @@ def load_env(filename, version):
     except Exception, e:
         logging.warn(e)
         return default
-
-def dump_env(obj, filename):
-    """
-    Dump KVM test environment to a file.
-
-    @param filename: Path to a file where the environment will be dumped to.
-    """
-    file = open(filename, "w")
-    cPickle.dump(obj, file)
-    file.close()
