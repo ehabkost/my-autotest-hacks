@@ -27,17 +27,6 @@ def _unlock_file(f):
     f.close()
 
 
-def dump_env(obj, filename):
-    """
-    Dump KVM test environment to a file.
-
-    @param filename: Path to a file where the environment will be dumped to.
-    """
-    file = open(filename, "w")
-    cPickle.dump(obj, file)
-    file.close()
-
-
 def load_env(filename, version):
     """
     Load KVM test environment from an env file.

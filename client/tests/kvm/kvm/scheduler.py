@@ -1,5 +1,5 @@
 import os, select
-import kvm_utils, kvm_vm, kvm_subprocess
+import kvm_utils, kvm_vm, kvm_subprocess, kvm.env
 
 
 class scheduler:
@@ -80,7 +80,7 @@ class scheduler:
                         obj.destroy()
                     elif isinstance(obj, kvm_subprocess.Spawn):
                         obj.close()
-                kvm_utils.dump_env(env, env_filename)
+                kvm.env.dump_env(env, env_filename)
                 w.write("cleanup_done\n")
                 w.write("ready\n")
 

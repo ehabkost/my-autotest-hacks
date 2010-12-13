@@ -70,13 +70,13 @@ class KvmTest(test.test):
                     try:
                         kvm_preprocessing.preprocess(self, params, env)
                     finally:
-                        kvm_utils.dump_env(env, env_filename)
+                        kvm.env.dump_env(env, env_filename)
                     # Run the test function
                     run_func = getattr(test_module, "run_%s" % t_type)
                     try:
                         run_func(self, params, envobj)
                     finally:
-                        kvm_utils.dump_env(env, env_filename)
+                        kvm.env.dump_env(env, env_filename)
                     test_passed = True
 
                 except Exception, e:
@@ -86,7 +86,7 @@ class KvmTest(test.test):
                         kvm_preprocessing.postprocess_on_error(
                             self, params, env)
                     finally:
-                        kvm_utils.dump_env(env, env_filename)
+                        kvm.env.dump_env(env, env_filename)
                     raise
 
             finally:
@@ -100,7 +100,7 @@ class KvmTest(test.test):
                         logging.error("Exception raised during "
                                       "postprocessing: %s", e)
                 finally:
-                    kvm_utils.dump_env(env, env_filename)
+                    kvm.env.dump_env(env, env_filename)
                     logging.debug("Contents of environment: %s", env)
 
         except Exception, e:
