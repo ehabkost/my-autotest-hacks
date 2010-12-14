@@ -177,7 +177,7 @@ tests = cfg.get_list()
 # -------------
 # Run the tests
 # -------------
-import kvm_scheduler
+import kvm.scheduler
 from autotest_lib.client.bin import utils
 
 # total_cpus defaults to the number of CPUs reported by /proc/cpuinfo
@@ -188,7 +188,7 @@ total_mem = int(commands.getoutput("free -m").splitlines()[1].split()[1]) * 3/4
 num_workers = total_cpus
 
 # Start the scheduler and workers
-s = kvm_scheduler.scheduler(tests, num_workers, total_cpus, total_mem, pwd)
+s = kvm.scheduler.scheduler(tests, num_workers, total_cpus, total_mem, pwd)
 job.parallel([s.scheduler],
              *[(s.worker, i, job.run_test) for i in range(num_workers)])
 
