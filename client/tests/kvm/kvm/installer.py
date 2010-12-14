@@ -173,7 +173,7 @@ def save_build(build_dir, dest_dir):
 
 
 class BaseInstaller(object):
-    def __init__(self, test, params):
+    def __init__(self, mode, test, params):
         load_modules = params.get('load_modules', 'no')
         if not load_modules or load_modules == 'yes':
             self.load_modules = True
@@ -214,8 +214,8 @@ class YumInstaller(BaseInstaller):
     """
     Class that uses yum to install and remove packages.
     """
-    def __init__(self, test, params):
-        super(YumInstaller, self).__init__(test, params)
+    def __init__(self, mode, test, params):
+        super(YumInstaller, self).__init__(mode, test, params)
         # Checking if all required dependencies are available
         os_dep.command("rpm")
         os_dep.command("yum")
@@ -270,14 +270,14 @@ class KojiInstaller(YumInstaller):
     Class that handles installing KVM from the fedora build service, koji.
     It uses yum to install and remove packages.
     """
-    def __init__(self, test, params):
+    def __init__(self, mode, test, params):
         """
         Gets parameters and initializes the package downloader.
 
         @param test: kvm test object
         @param params: Dictionary with test arguments
         """
-        super(KojiInstaller, self).__init__(test, params)
+        super(KojiInstaller, self).__init__(mode, test, params)
         default_koji_cmd = '/usr/bin/koji'
         default_src_pkg = 'qemu'
         self.src_pkg = params.get("src_pkg", default_src_pkg)
@@ -312,16 +312,15 @@ class SourceDirInstaller(BaseInstaller):
     Class that handles building/installing KVM directly from a tarball or
     a single source code dir.
     """
-    def __init__(self, test, params):
+    def __init__(self, install_mode, test, params):
         """
         Initializes class attributes, and retrieves KVM code.
 
         @param test: kvm test object
         @param params: Dictionary with test arguments
         """
-        super(SourceDirInstaller, self).__init__(test, params)
+        super(SourceDirInstaller, self).__init__(install_mode, test, params)
 
-        install_mode = params["mode"]
         srcdir = params.get("srcdir", None)
         self.path_to_roms = params.get("path_to_rom_images", None)
 
@@ -421,14 +420,14 @@ class SourceDirInstaller(BaseInstaller):
 
 
 class GitInstaller(SourceDirInstaller):
-    def __init__(self, test, params):
+    def __init__(self, mode, test, params):
         """
         Initialize class parameters and retrieves code from git repositories.
 
         @param test: kvm test object.
         @param params: Dictionary with test parameters.
         """
-        super(GitInstaller, self).__init__(test, params)
+        super(GitInstaller, self).__init__(mode, test, params)
 
         kernel_repo = params.get("git_repo")
         user_repo = params.get("user_git_repo")
@@ -620,4 +619,4 @@ def _installer_class(install_mode):
 def make_installer(test, params):
     mode = params.get("mode")
     klass = _installer_class(mode)
-    return klass(test, params)
+    return klass(mode, test, params)
