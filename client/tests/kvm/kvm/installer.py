@@ -57,6 +57,10 @@ def load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=No
 
     kill_qemu_processes()
 
+    _unload_kvm_modules(vendor, extra_modules)
+    _load_kvm_modules(vendor, module_dir, load_stock, extra_modules)
+
+def _unload_kvm_modules(vendor, extra_modules):
     logging.info("Unloading previously loaded KVM modules")
     utils.unload_module("kvm-%s" % (vendor))
     utils.unload_module("kvm")
@@ -64,6 +68,9 @@ def load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=No
         for module in extra_modules:
             utils.unload_module(module)
 
+def _load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=None):
+    """Just load the KVM modules, without killing Qemu or unloading previous modules
+    """
     if module_dir:
         logging.info("Loading the built KVM modules...")
         kvm_module_path = None
