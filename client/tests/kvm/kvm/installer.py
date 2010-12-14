@@ -44,13 +44,19 @@ def cpu_vendor():
     logging.debug("Detected CPU vendor as '%s'" %(vendor))
     return vendor
 
+def _module_list(vendor, extra_modules):
+    """Generate the list of modules that need to be loaded, from the given arguments
+    """
+    yield 'kvm'
+    yield 'kvm-%s' % (vendor)
+    if extra_modules:
+        for module in extra_modules:
+            yield module
+
 def _unload_kvm_modules(vendor, extra_modules):
     logging.info("Unloading previously loaded KVM modules")
-    if extra_modules:
-        for module in reversed(extra_modules):
-            utils.unload_module(module)
-    utils.unload_module("kvm-%s" % (vendor))
-    utils.unload_module("kvm")
+    for module in reversed(_module_list(vendor, extra_modules)):
+        utils.unload_module(module)
 
 def _load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=None):
     """Just load the KVM modules, without killing Qemu or unloading previous modules
@@ -68,10 +74,7 @@ def _load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=N
         kvm_vendor_module_path = None
         abort = False
 
-        list_modules = ['kvm.ko', 'kvm-%s.ko' % vendor]
-        if extra_modules:
-            for extra_module in extra_modules:
-                list_modules.append('%s.ko' % extra_module)
+        list_modules = ['%s.ko' % (m) for m in _module_list(vendor, extra_modules)]
 
         list_module_paths = []
         for folder, subdirs, files in os.walk(module_dir):
@@ -105,11 +108,8 @@ def _load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=N
 
     if load_stock:
         logging.info("Loading current system KVM modules...")
-        utils.system("modprobe kvm")
-        utils.system("modprobe kvm-%s" % vendor)
-        if extra_modules:
-            for module in extra_modules:
-                utils.system("modprobe %s" % module)
+        for module in _module_list(vendor, extra_modules):
+            utils.system("modprobe %s" % module)
 
 
 def create_symlinks(test_bindir, prefix=None, bin_list=None, unittest=None):
