@@ -37,6 +37,13 @@ def kill_qemu_processes():
         utils.system("fuser -k /dev/kvm", ignore_status=True)
 
 
+def cpu_vendor():
+    vendor = "intel"
+    if os.system("grep vmx /proc/cpuinfo 1>/dev/null") != 0:
+        vendor = "amd"
+    logging.debug("Detected CPU vendor as '%s'" %(vendor))
+    return vendor
+
 def load_kvm_modules(module_dir=None, load_stock=False, extra_modules=None):
     """
     Unload previously loaded kvm modules, then load modules present on any
@@ -47,11 +54,8 @@ def load_kvm_modules(module_dir=None, load_stock=False, extra_modules=None):
     @param load_stock: Whether we are going to load system kernel modules.
     @param extra_modules: List of extra modules to load.
     """
-    vendor = "intel"
-    if os.system("grep vmx /proc/cpuinfo 1>/dev/null") != 0:
-        vendor = "amd"
-    logging.debug("Detected CPU vendor as '%s'" %(vendor))
 
+    vendor = cpu_vendor()
     kill_qemu_processes()
 
     logging.info("Unloading previously loaded KVM modules")
