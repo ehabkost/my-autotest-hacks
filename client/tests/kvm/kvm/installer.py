@@ -600,18 +600,22 @@ class GitInstaller(SourceDirInstaller):
             save_build(self.srcdir, self.results_dir)
 
 
+installer_classes = {
+    'localsrc':SourceDirInstaller,
+    'localtar':SourceDirInstaller,
+    'release':SourceDirInstaller,
+    'snapshot':SourceDirInstaller,
+    'git':GitInstaller,
+    'yum':YumInstaller,
+    'koji':KojiInstaller,
+}
+
 def _installer_class(install_mode):
-    if install_mode in ['localsrc', 'localtar', 'release', 'snapshot']:
-        return SourceDirInstaller
-    elif install_mode == 'git':
-        return GitInstaller
-    elif install_mode == 'yum':
-        return YumInstaller
-    elif install_mode == 'koji':
-        return KojiInstaller
-    else:
+    c = installer_classes.get(install_mode)
+    if c is None:
         raise error.TestError('Invalid or unsupported'
                               ' install mode: %s' % install_mode)
+    return c
 
 def make_installer(test, params):
     mode = params.get("mode")
