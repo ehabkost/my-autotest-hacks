@@ -210,6 +210,16 @@ class BaseInstaller(object):
             self.save_results = False
 
 
+    # default value for load_stock argument
+    load_stock_modules = True
+
+    def load_modules(self):
+        """Load the KVM modules
+
+        May be overridden by subclasses.
+        """
+        load_kvm_modules(load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
+
 class YumInstaller(BaseInstaller):
     """
     Class that uses yum to install and remove packages.
@@ -253,6 +263,8 @@ class YumInstaller(BaseInstaller):
         utils.system("yum install --nogpgcheck -y *.rpm")
 
 
+    load_stock_modules = True
+
     def install(self):
         self._clean_previous_installs()
         self._get_packages()
@@ -260,7 +272,7 @@ class YumInstaller(BaseInstaller):
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
         if self.should_load_modules:
-            load_kvm_modules(load_stock=True, extra_modules=self.extra_modules)
+            self.load_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -295,6 +307,8 @@ class KojiInstaller(YumInstaller):
                             build=self.build, dst_dir=self.srcdir)
 
 
+    load_stock_modules = True
+
     def install(self):
         super(KojiInstaller, self)._clean_previous_installs()
         self._get_packages()
@@ -302,7 +316,7 @@ class KojiInstaller(YumInstaller):
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
         if self.should_load_modules:
-            load_kvm_modules(load_stock=True, extra_modules=self.extra_modules)
+            self.load_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -405,7 +419,7 @@ class SourceDirInstaller(BaseInstaller):
         create_symlinks(self.test_bindir, self.prefix)
 
 
-    def _load_modules(self):
+    def load_modules(self):
         load_kvm_modules(module_dir=self.srcdir,
                          extra_modules=self.extra_modules)
 
@@ -414,7 +428,7 @@ class SourceDirInstaller(BaseInstaller):
         self._build()
         self._install()
         if self.should_load_modules:
-            self._load_modules()
+            self.load_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -577,7 +591,7 @@ class GitInstaller(SourceDirInstaller):
                         unittest=self.unittest_prefix)
 
 
-    def _load_modules(self):
+    def load_modules(self):
         if self.kmod_srcdir and self.modules_build_succeed:
             load_kvm_modules(module_dir=self.kmod_srcdir,
                              extra_modules=self.extra_modules)
@@ -594,7 +608,7 @@ class GitInstaller(SourceDirInstaller):
         self._build()
         self._install()
         if self.should_load_modules:
-            self._load_modules()
+            self.load_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
