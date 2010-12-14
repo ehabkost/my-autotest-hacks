@@ -275,7 +275,7 @@ def migrate(vm, env=None, mig_timeout=3600, mig_protocol="tcp",
 
     # Replace the source VM with the new cloned VM
     if (dest_host == 'localhost') and (env is not None):
-        kvm_utils.env_register_vm(env, vm.name, dest_vm)
+        env.register_vm(vm.name, dest_vm)
 
     # Return the new cloned VM
     if dest_host == 'localhost':

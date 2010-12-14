@@ -56,7 +56,7 @@ def preprocess_vm(test, params, env, name):
     else:
         logging.debug("VM object does not exist; creating it")
         vm = kvm_vm.VM(name, params, test.bindir, env.get("address_cache"))
-        kvm_utils.env_register_vm(env, name, vm)
+        env.register_vm(name, vm)
 
     start_vm = False
 

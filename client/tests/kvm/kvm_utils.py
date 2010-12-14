@@ -216,27 +216,6 @@ def is_vm(obj):
     return obj.__class__.__name__ == "VM"
 
 
-def env_register_vm(env, name, vm):
-    """
-    Register a given VM in a given env.
-
-    @param env: Environment where we will register the VM.
-    @param name: VM name.
-    @param vm: VM object.
-    """
-    env["vm__%s" % name] = vm
-
-
-def env_unregister_vm(env, name):
-    """
-    Remove a given VM from a given env.
-
-    @param env: Environment where we will un-register the VM.
-    @param name: VM name.
-    """
-    del env["vm__%s" % name]
-
-
 # Utility functions for dealing with external processes
 
 def find_command(cmd):

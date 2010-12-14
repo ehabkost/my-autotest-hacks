@@ -44,6 +44,23 @@ class KvmEnv(UserDict.IterableUserDict):
         """
         return self.get("vm__%s" % name)
 
+    def register_vm(self, name, vm):
+        """
+        Register a given VM in a given env.
+
+        @param name: VM name.
+        @param vm: VM object.
+        """
+        self.data["vm__%s" % name] = vm
+
+    def unregister_vm(self, name):
+        """
+        Remove a given VM from a given env.
+
+        @param name: VM name.
+        """
+        del self.data["vm__%s" % name]
+
 def _load_env(filename, version):
     """
     Load KVM test environment from an env file.
@@ -69,3 +86,4 @@ def _load_env(filename, version):
 
 def load(filename, version):
     return KvmEnv(_load_env(filename, version), filename)
+

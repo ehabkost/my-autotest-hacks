@@ -575,7 +575,7 @@ def run_ksm_overcommit(test, params, env):
 
         # Last VM is later used to run more allocators simultaneously
         lvms.append(lvms[0].clone(vm_name, params))
-        kvm_utils.env_register_vm(env, vm_name, lvms[i])
+        env.register_vm(vm_name, lvms[i])
         params['vms'] += " " + vm_name
 
         logging.debug("Booting guest %s" % lvms[i].name)

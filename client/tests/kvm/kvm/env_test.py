@@ -66,3 +66,14 @@ class KvmEnvtest(unittest.TestCase):
         d = {'foo':'bar', 'foo2':'bar2'}
         e = kvm.env.KvmEnv(d)
         self.assertEquals(set(e.values()), set(['bar', 'bar2']))
+
+    def test_vm_registration(self):
+        vm1 = [1]
+        vm2 = [2]
+
+        e = kvm.env.KvmEnv({})
+        e.register_vm('vm1', vm1)
+        e.register_vm('vm2', vm2)
+
+        self.assertIs(e.get_vm('vm1'), vm1)
+        self.assertIs(e.get_vm('vm2'), vm2)
