@@ -44,15 +44,6 @@ def cpu_vendor():
     logging.debug("Detected CPU vendor as '%s'" %(vendor))
     return vendor
 
-def _module_list(vendor, extra_modules):
-    """Generate the list of modules that need to be loaded, from the given arguments
-    """
-    yield 'kvm'
-    yield 'kvm-%s' % (vendor)
-    if extra_modules:
-        for module in extra_modules:
-            yield module
-
 def _unload_kvm_modules(mod_list):
     logging.info("Unloading previously loaded KVM modules")
     for module in reversed(mod_list):
@@ -218,7 +209,13 @@ class BaseInstaller(object):
     load_stock_modules = True
 
     def _module_list(self):
-        return _module_list(self.cpu_vendor, self.extra_modules)
+        """Generate the list of modules that need to be loaded
+        """
+        yield 'kvm'
+        yield 'kvm-%s' % (self.cpu_vendor)
+        if self.extra_modules:
+            for module in self.extra_modules:
+                yield module
 
     def load_modules(self):
         """Load the KVM modules
@@ -445,7 +442,6 @@ class SourceDirInstaller(BaseInstaller):
 
     def load_modules(self):
         _load_kvm_modules(self._module_list(), module_dir=self.srcdir)
-
 
     def install(self):
         self._build()
