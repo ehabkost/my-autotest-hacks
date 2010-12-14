@@ -4,7 +4,7 @@ from autotest_lib.client.common_lib import error
 import kvm_utils, kvm_preprocessing
 
 
-class kvm(test.test):
+class KvmTest(test.test):
     """
     Suite of KVM virtualization functional tests.
     Contains tests for testing both KVM kernel code and userspace code.
