@@ -612,6 +612,13 @@ class GitInstaller(SourceDirInstaller):
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
+class PreInstalledKvm(BaseInstaller):
+    def install(self):
+        logging.info("Expecting KVM to be already installed. Doing nothing")
+
+    # load_modules() will use the stock modules:
+    load_stock_modules = True
+
 
 installer_classes = {
     'localsrc':SourceDirInstaller,
@@ -621,6 +628,7 @@ installer_classes = {
     'git':GitInstaller,
     'yum':YumInstaller,
     'koji':KojiInstaller,
+    'preinstalled':PreInstalledKvm, 
 }
 
 def _installer_class(install_mode):
