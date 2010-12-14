@@ -226,12 +226,17 @@ class BaseInstaller(object):
     # default value for load_stock argument
     load_stock_modules = True
 
-    def reload_modules(self):
-        """Reload the KVM modules
+    def load_modules(self):
+        """Load the KVM modules
 
         May be overridden by subclasses.
         """
         load_kvm_modules(self.cpu_vendor, load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
+
+    def reload_modules(self):
+        """Reload the KVM modules after killing Qemu and unloading the current modules
+        """
+        return self.load_modules()
 
 class YumInstaller(BaseInstaller):
     """
@@ -432,7 +437,7 @@ class SourceDirInstaller(BaseInstaller):
         create_symlinks(self.test_bindir, self.prefix)
 
 
-    def reload_modules(self):
+    def load_modules(self):
         load_kvm_modules(self.cpu_vendor, module_dir=self.srcdir,
                          extra_modules=self.extra_modules)
 
@@ -604,7 +609,7 @@ class GitInstaller(SourceDirInstaller):
                         unittest=self.unittest_prefix)
 
 
-    def reload_modules(self):
+    def load_modules(self):
         if self.kmod_srcdir and self.modules_build_succeed:
             load_kvm_modules(self.cpu_vendor, module_dir=self.kmod_srcdir,
                              extra_modules=self.extra_modules)
@@ -629,7 +634,7 @@ class PreInstalledKvm(BaseInstaller):
     def install(self):
         logging.info("Expecting KVM to be already installed. Doing nothing")
 
-    # reload_modules() will use the stock modules:
+    # load_modules() will use the stock modules:
     load_stock_modules = True
 
 
