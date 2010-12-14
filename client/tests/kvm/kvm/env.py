@@ -27,10 +27,22 @@ class KvmEnv(UserDict.IterableUserDict):
         return self._dump(self._filename)
 
     def get_all_vms(self):
-        return env_get_all_vms(self)
+        """
+        Return a list of all VM objects on a given environment.
+        """
+        vms = []
+        for obj in self.values():
+            if kvm_utils.is_vm(obj):
+                vms.append(obj)
+        return vms
 
     def get_vm(self, name):
-        return env_get_vm(self, name)
+        """
+        Return a VM object by its name.
+
+        @param name: VM name.
+        """
+        return self.get("vm__%s" % name)
 
 def _load_env(filename, version):
     """
@@ -57,25 +69,3 @@ def _load_env(filename, version):
 
 def load(filename, version):
     return KvmEnv(_load_env(filename, version), filename)
-
-
-def env_get_all_vms(env):
-    """
-    Return a list of all VM objects on a given environment.
-
-    @param env: Dictionary with environment items.
-    """
-    vms = []
-    for obj in env.values():
-        if kvm_utils.is_vm(obj):
-            vms.append(obj)
-    return vms
-
-
-def env_get_vm(env, name):
-    """
-    Return a VM object by its name.
-
-    @param name: VM name.
-    """
-    return env.get("vm__%s" % name)
