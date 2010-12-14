@@ -226,8 +226,8 @@ class BaseInstaller(object):
     # default value for load_stock argument
     load_stock_modules = True
 
-    def load_modules(self):
-        """Load the KVM modules
+    def reload_modules(self):
+        """Reload the KVM modules
 
         May be overridden by subclasses.
         """
@@ -285,7 +285,7 @@ class YumInstaller(BaseInstaller):
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
         if self.should_load_modules:
-            self.load_modules()
+            self.reload_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -329,7 +329,7 @@ class KojiInstaller(YumInstaller):
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
         if self.should_load_modules:
-            self.load_modules()
+            self.reload_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -432,7 +432,7 @@ class SourceDirInstaller(BaseInstaller):
         create_symlinks(self.test_bindir, self.prefix)
 
 
-    def load_modules(self):
+    def reload_modules(self):
         load_kvm_modules(self.cpu_vendor, module_dir=self.srcdir,
                          extra_modules=self.extra_modules)
 
@@ -441,7 +441,7 @@ class SourceDirInstaller(BaseInstaller):
         self._build()
         self._install()
         if self.should_load_modules:
-            self.load_modules()
+            self.reload_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -604,7 +604,7 @@ class GitInstaller(SourceDirInstaller):
                         unittest=self.unittest_prefix)
 
 
-    def load_modules(self):
+    def reload_modules(self):
         if self.kmod_srcdir and self.modules_build_succeed:
             load_kvm_modules(self.cpu_vendor, module_dir=self.kmod_srcdir,
                              extra_modules=self.extra_modules)
@@ -621,7 +621,7 @@ class GitInstaller(SourceDirInstaller):
         self._build()
         self._install()
         if self.should_load_modules:
-            self.load_modules()
+            self.reload_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -629,7 +629,7 @@ class PreInstalledKvm(BaseInstaller):
     def install(self):
         logging.info("Expecting KVM to be already installed. Doing nothing")
 
-    # load_modules() will use the stock modules:
+    # reload_modules() will use the stock modules:
     load_stock_modules = True
 
 
