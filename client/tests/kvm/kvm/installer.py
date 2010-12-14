@@ -555,7 +555,6 @@ class GitInstaller(SourceDirInstaller):
     def _build(self):
         make_jobs = utils.count_cpus()
         cfg = './configure'
-        self.modules_build_succeed = False
         if self.kmod_srcdir:
             logging.info('Building KVM modules')
             os.chdir(self.kmod_srcdir)
@@ -573,13 +572,8 @@ class GitInstaller(SourceDirInstaller):
         else:
             module_build_steps = []
 
-        try:
-            if module_build_steps:
-                for step in module_build_steps:
-                    utils.run(step)
-                self.modules_build_succeed = True
-        except error.CmdError, e:
-            logging.error("KVM modules build failed to build: %s" % e)
+        for step in module_build_steps:
+            utils.run(step)
 
         logging.info('Building KVM userspace code')
         os.chdir(self.userspace_srcdir)
@@ -613,9 +607,9 @@ class GitInstaller(SourceDirInstaller):
 
 
     def load_modules(self):
-        if self.kmod_srcdir and self.modules_build_succeed:
+        if self.kmod_srcdir:
             _load_kvm_modules(self._full_module_list, module_dir=self.kmod_srcdir)
-        elif self.kernel_srcdir and self.modules_build_succeed:
+        elif self.kernel_srcdir:
             _load_kvm_modules(self._full_module_list, module_dir=self.userspace_srcdir)
         else:
             logging.info("Loading stock KVM modules")
