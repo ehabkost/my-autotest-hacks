@@ -9,9 +9,8 @@ def run_build(test, params, env):
     @param params: Dictionary with test parameters.
     @param env: Test environment.
     """
-    install_mode = params.get("mode")
     srcdir = params.get("srcdir", test.srcdir)
     params["srcdir"] = srcdir
 
-    installer = kvm.installer.make_installer(install_mode, test, params)
+    installer = kvm.installer.make_installer(test, params)
     installer.install()

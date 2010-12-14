@@ -613,6 +613,7 @@ def _installer_class(install_mode):
         raise error.TestError('Invalid or unsupported'
                               ' install mode: %s' % install_mode)
 
-def make_installer(mode, test, params):
+def make_installer(test, params):
+    mode = params.get("mode")
     klass = _installer_class(mode)
     return klass(test, params)
