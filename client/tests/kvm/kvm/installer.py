@@ -204,6 +204,8 @@ class BaseInstaller(object):
         if save_results == 'no':
             self.save_results = False
 
+        self._full_module_list = list(self._module_list())
+
 
     # default value for load_stock argument
     load_stock_modules = True
@@ -222,12 +224,12 @@ class BaseInstaller(object):
 
         May be overridden by subclasses.
         """
-        _load_kvm_modules(self._module_list(), load_stock=self.load_stock_modules)
+        _load_kvm_modules(self._full_module_list, load_stock=self.load_stock_modules)
 
     def _unload_modules(self):
         """Just unload the KVM modules, without trying to kill Qemu
         """
-        _unload_kvm_modules(self._module_list())
+        _unload_kvm_modules(self._full_module_list)
 
     def unload_modules(self):
         """Kill Qemu and unload the KVM modules
@@ -441,7 +443,7 @@ class SourceDirInstaller(BaseInstaller):
 
 
     def load_modules(self):
-        _load_kvm_modules(self._module_list(), module_dir=self.srcdir)
+        _load_kvm_modules(self._full_module_list, module_dir=self.srcdir)
 
     def install(self):
         self._build()
@@ -612,12 +614,12 @@ class GitInstaller(SourceDirInstaller):
 
     def load_modules(self):
         if self.kmod_srcdir and self.modules_build_succeed:
-            _load_kvm_modules(self._module_list(), module_dir=self.kmod_srcdir)
+            _load_kvm_modules(self._full_module_list, module_dir=self.kmod_srcdir)
         elif self.kernel_srcdir and self.modules_build_succeed:
-            _load_kvm_modules(self._module_list(), module_dir=self.userspace_srcdir)
+            _load_kvm_modules(self._full_module_list, module_dir=self.userspace_srcdir)
         else:
             logging.info("Loading stock KVM modules")
-            _load_kvm_modules(self._module_list(), load_stock=True)
+            _load_kvm_modules(self._full_module_list, load_stock=True)
 
 
     def install(self):
