@@ -600,6 +600,19 @@ class GitInstaller(SourceDirInstaller):
             save_build(self.srcdir, self.results_dir)
 
 
+def _installer_class(install_mode):
+    if install_mode in ['localsrc', 'localtar', 'release', 'snapshot']:
+        return SourceDirInstaller
+    elif install_mode == 'git':
+        return GitInstaller
+    elif install_mode == 'yum':
+        return YumInstaller
+    elif install_mode == 'koji':
+        return KojiInstaller
+    else:
+        raise error.TestError('Invalid or unsupported'
+                              ' install mode: %s' % install_mode)
+
 def run_build(test, params, env):
     """
     Installs KVM using the selected install mode. Most install methods will
@@ -613,16 +626,7 @@ def run_build(test, params, env):
     srcdir = params.get("srcdir", test.srcdir)
     params["srcdir"] = srcdir
 
-    if install_mode in ['localsrc', 'localtar', 'release', 'snapshot']:
-        installer = SourceDirInstaller(test, params)
-    elif install_mode == 'git':
-        installer = GitInstaller(test, params)
-    elif install_mode == 'yum':
-        installer = YumInstaller(test, params)
-    elif install_mode == 'koji':
-        installer = KojiInstaller(test, params)
-    else:
-        raise error.TestError('Invalid or unsupported'
-                              ' install mode: %s' % install_mode)
+    klass = _installer_class(install_mode)
+    installer = klass(test, params)
 
     installer.install()
