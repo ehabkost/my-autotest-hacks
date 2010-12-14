@@ -44,22 +44,6 @@ def cpu_vendor():
     logging.debug("Detected CPU vendor as '%s'" %(vendor))
     return vendor
 
-def load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=None):
-    """
-    Unload previously loaded kvm modules, then load modules present on any
-    sub directory of module_dir. Function will walk through module_dir until
-    it finds the modules.
-
-    @param module_dir: Directory where the KVM modules are located.
-    @param load_stock: Whether we are going to load system kernel modules.
-    @param extra_modules: List of extra modules to load.
-    """
-
-    kill_qemu_processes()
-
-    _unload_kvm_modules(vendor, extra_modules)
-    _load_kvm_modules(vendor, module_dir, load_stock, extra_modules)
-
 def _unload_kvm_modules(vendor, extra_modules):
     logging.info("Unloading previously loaded KVM modules")
     if extra_modules:
@@ -70,6 +54,13 @@ def _unload_kvm_modules(vendor, extra_modules):
 
 def _load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=None):
     """Just load the KVM modules, without killing Qemu or unloading previous modules
+
+    Load modules present on any sub directory of module_dir. Function will walk
+    through module_dir until it finds the modules.
+
+    @param module_dir: Directory where the KVM modules are located.
+    @param load_stock: Whether we are going to load system kernel modules.
+    @param extra_modules: List of extra modules to load.
     """
     if module_dir:
         logging.info("Loading the built KVM modules...")
@@ -231,12 +222,14 @@ class BaseInstaller(object):
 
         May be overridden by subclasses.
         """
-        load_kvm_modules(self.cpu_vendor, load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
+        _load_kvm_modules(self.cpu_vendor, load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
 
     def reload_modules(self):
         """Reload the KVM modules after killing Qemu and unloading the current modules
         """
-        return self.load_modules()
+        kill_qemu_processes()
+        _unload_kvm_modules(self.cpu_vendor, self.extra_modules)
+        self.load_modules()
 
 class YumInstaller(BaseInstaller):
     """
@@ -438,7 +431,7 @@ class SourceDirInstaller(BaseInstaller):
 
 
     def load_modules(self):
-        load_kvm_modules(self.cpu_vendor, module_dir=self.srcdir,
+        _load_kvm_modules(self.cpu_vendor, module_dir=self.srcdir,
                          extra_modules=self.extra_modules)
 
 
@@ -611,14 +604,14 @@ class GitInstaller(SourceDirInstaller):
 
     def load_modules(self):
         if self.kmod_srcdir and self.modules_build_succeed:
-            load_kvm_modules(self.cpu_vendor, module_dir=self.kmod_srcdir,
+            _load_kvm_modules(self.cpu_vendor, module_dir=self.kmod_srcdir,
                              extra_modules=self.extra_modules)
         elif self.kernel_srcdir and self.modules_build_succeed:
-            load_kvm_modules(self.cpu_vendor, module_dir=self.userspace_srcdir,
+            _load_kvm_modules(self.cpu_vendor, module_dir=self.userspace_srcdir,
                              extra_modules=self.extra_modules)
         else:
             logging.info("Loading stock KVM modules")
-            load_kvm_modules(self.cpu_vendor, load_stock=True,
+            _load_kvm_modules(self.cpu_vendor, load_stock=True,
                              extra_modules=self.extra_modules)
 
 
