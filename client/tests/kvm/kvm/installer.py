@@ -167,6 +167,8 @@ def save_build(build_dir, dest_dir):
 
 class BaseInstaller(object):
     def __init__(self, mode, test, params):
+        self.params = params
+
         load_modules = params.get('load_modules', 'no')
         if not load_modules or load_modules == 'yes':
             self.should_load_modules = True
@@ -456,13 +458,14 @@ class SourceDirInstaller(BaseInstaller):
 
 class GitInstaller(SourceDirInstaller):
     def __init__(self, mode, test, params):
-        """
-        Initialize class parameters and retrieves code from git repositories.
-
-        @param test: kvm test object.
-        @param params: Dictionary with test parameters.
-        """
         super(GitInstaller, self).__init__(mode, test, params)
+
+
+    def _pull_code(self):
+        """
+        Retrieves code from git repositories.
+        """
+        params = self.params
 
         kernel_repo = params.get("git_repo")
         user_repo = params.get("user_git_repo")
@@ -617,6 +620,7 @@ class GitInstaller(SourceDirInstaller):
 
 
     def install(self):
+        self._pull_code()
         self._build()
         self._install()
         if self.should_load_modules:
