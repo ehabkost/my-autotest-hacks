@@ -176,9 +176,9 @@ class BaseInstaller(object):
     def __init__(self, mode, test, params):
         load_modules = params.get('load_modules', 'no')
         if not load_modules or load_modules == 'yes':
-            self.load_modules = True
+            self.should_load_modules = True
         elif load_modules == 'no':
-            self.load_modules = False
+            self.should_load_modules = False
         default_extra_modules = str(None)
         self.extra_modules = eval(params.get("extra_modules",
                                              default_extra_modules))
@@ -259,7 +259,7 @@ class YumInstaller(BaseInstaller):
         self._install_packages()
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
-        if self.load_modules:
+        if self.should_load_modules:
             load_kvm_modules(load_stock=True, extra_modules=self.extra_modules)
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
@@ -301,7 +301,7 @@ class KojiInstaller(YumInstaller):
         super(KojiInstaller, self)._install_packages()
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
-        if self.load_modules:
+        if self.should_load_modules:
             load_kvm_modules(load_stock=True, extra_modules=self.extra_modules)
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
@@ -413,7 +413,7 @@ class SourceDirInstaller(BaseInstaller):
     def install(self):
         self._build()
         self._install()
-        if self.load_modules:
+        if self.should_load_modules:
             self._load_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
@@ -593,7 +593,7 @@ class GitInstaller(SourceDirInstaller):
     def install(self):
         self._build()
         self._install()
-        if self.load_modules:
+        if self.should_load_modules:
             self._load_modules()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
