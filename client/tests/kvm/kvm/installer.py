@@ -224,11 +224,16 @@ class BaseInstaller(object):
         """
         _load_kvm_modules(self.cpu_vendor, load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
 
-    def reload_modules(self):
-        """Reload the KVM modules after killing Qemu and unloading the current modules
+    def unload_modules(self):
+        """Kill Qemu and unload the KVM modules
         """
         kill_qemu_processes()
         _unload_kvm_modules(self.cpu_vendor, self.extra_modules)
+
+    def reload_modules(self):
+        """Reload the KVM modules after killing Qemu and unloading the current modules
+        """
+        self.unload_modules()
         self.load_modules()
 
 class YumInstaller(BaseInstaller):
