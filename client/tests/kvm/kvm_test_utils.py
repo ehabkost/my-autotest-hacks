@@ -35,7 +35,7 @@ def get_living_vm(env, vm_name):
     @param vm_name: Name of the desired VM object.
     @return: A VM object.
     """
-    vm = kvm_utils.env_get_vm(env, vm_name)
+    vm = env.get_vm(vm_name)
     if not vm:
         raise error.TestError("VM '%s' not found in environment" % vm_name)
     if not vm.is_alive():

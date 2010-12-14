@@ -216,28 +216,6 @@ def is_vm(obj):
     return obj.__class__.__name__ == "VM"
 
 
-def env_get_all_vms(env):
-    """
-    Return a list of all VM objects on a given environment.
-
-    @param env: Dictionary with environment items.
-    """
-    vms = []
-    for obj in env.values():
-        if is_vm(obj):
-            vms.append(obj)
-    return vms
-
-
-def env_get_vm(env, name):
-    """
-    Return a VM object by its name.
-
-    @param name: VM name.
-    """
-    return env.get("vm__%s" % name)
-
-
 def env_register_vm(env, name, vm):
     """
     Register a given VM in a given env.
