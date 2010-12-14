@@ -44,7 +44,7 @@ def cpu_vendor():
     logging.debug("Detected CPU vendor as '%s'" %(vendor))
     return vendor
 
-def load_kvm_modules(module_dir=None, load_stock=False, extra_modules=None):
+def load_kvm_modules(vendor, module_dir=None, load_stock=False, extra_modules=None):
     """
     Unload previously loaded kvm modules, then load modules present on any
     sub directory of module_dir. Function will walk through module_dir until
@@ -55,7 +55,6 @@ def load_kvm_modules(module_dir=None, load_stock=False, extra_modules=None):
     @param extra_modules: List of extra modules to load.
     """
 
-    vendor = cpu_vendor()
     kill_qemu_processes()
 
     logging.info("Unloading previously loaded KVM modules")
@@ -187,6 +186,8 @@ class BaseInstaller(object):
         self.extra_modules = eval(params.get("extra_modules",
                                              default_extra_modules))
 
+        self.cpu_vendor = cpu_vendor()
+
         self.srcdir = test.srcdir
         if not os.path.isdir(self.srcdir):
             os.makedirs(self.srcdir)
@@ -222,7 +223,7 @@ class BaseInstaller(object):
 
         May be overridden by subclasses.
         """
-        load_kvm_modules(load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
+        load_kvm_modules(self.cpu_vendor, load_stock=self.load_stock_modules, extra_modules=self.extra_modules)
 
 class YumInstaller(BaseInstaller):
     """
@@ -424,7 +425,7 @@ class SourceDirInstaller(BaseInstaller):
 
 
     def load_modules(self):
-        load_kvm_modules(module_dir=self.srcdir,
+        load_kvm_modules(self.cpu_vendor, module_dir=self.srcdir,
                          extra_modules=self.extra_modules)
 
 
@@ -597,14 +598,14 @@ class GitInstaller(SourceDirInstaller):
 
     def load_modules(self):
         if self.kmod_srcdir and self.modules_build_succeed:
-            load_kvm_modules(module_dir=self.kmod_srcdir,
+            load_kvm_modules(self.cpu_vendor, module_dir=self.kmod_srcdir,
                              extra_modules=self.extra_modules)
         elif self.kernel_srcdir and self.modules_build_succeed:
-            load_kvm_modules(module_dir=self.userspace_srcdir,
+            load_kvm_modules(self.cpu_vendor, module_dir=self.userspace_srcdir,
                              extra_modules=self.extra_modules)
         else:
             logging.info("Loading stock KVM modules")
-            load_kvm_modules(load_stock=True,
+            load_kvm_modules(self.cpu_vendor, load_stock=True,
                              extra_modules=self.extra_modules)
 
 
