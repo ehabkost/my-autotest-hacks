@@ -22,7 +22,8 @@ class KvmEnv(UserDict.IterableUserDict):
         cPickle.dump(self.data, file)
         file.close()
 
-def load_env(filename, version):
+
+def _load_env(filename, version):
     """
     Load KVM test environment from an env file.
     If the version recorded in the file is lower than version, return an empty
@@ -44,3 +45,6 @@ def load_env(filename, version):
     except Exception, e:
         logging.warn(e)
         return default
+
+def load(filename, version):
+    return KvmEnv(_load_env(filename, version))
