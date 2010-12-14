@@ -613,6 +613,10 @@ def _installer_class(install_mode):
         raise error.TestError('Invalid or unsupported'
                               ' install mode: %s' % install_mode)
 
+def make_installer(mode, test, params):
+    klass = _installer_class(mode)
+    return klass(test, params)
+
 def run_build(test, params, env):
     """
     Installs KVM using the selected install mode. Most install methods will
@@ -626,7 +630,5 @@ def run_build(test, params, env):
     srcdir = params.get("srcdir", test.srcdir)
     params["srcdir"] = srcdir
 
-    klass = _installer_class(install_mode)
-    installer = klass(test, params)
-
+    installer = make_installer(install_mode, test, params)
     installer.install()
