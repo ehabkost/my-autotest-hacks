@@ -40,11 +40,8 @@ class KvmTest(test.test):
         logging.info("Unpickling env. You may see some harmless error "
                      "messages.")
         env_filename = os.path.join(self.bindir, params.get("env", "env"))
-
-        envobj = kvm.env.load(env_filename, self.env_version)
-        env = envobj.data # reference the dict kept by KvmEnv, as the original 'env' dict won't be changed by KvmEnv
-
-        logging.debug("Contents of environment: %s", envobj)
+        env = kvm.env.load(env_filename, self.env_version)
+        logging.debug("Contents of environment: %s", env)
 
         test_passed = False
 
@@ -67,15 +64,15 @@ class KvmTest(test.test):
 
                     # Preprocess
                     try:
-                        kvm_preprocessing.preprocess(self, params, envobj)
+                        kvm_preprocessing.preprocess(self, params, env)
                     finally:
-                        envobj.save()
+                        env.save()
                     # Run the test function
                     run_func = getattr(test_module, "run_%s" % t_type)
                     try:
-                        run_func(self, params, envobj)
+                        run_func(self, params, env)
                     finally:
-                        envobj.save()
+                        env.save()
                     test_passed = True
 
                 except Exception, e:
@@ -83,31 +80,31 @@ class KvmTest(test.test):
                                   e.__class__.__name__, e)
                     try:
                         kvm_preprocessing.postprocess_on_error(
-                            self, params, envobj)
+                            self, params, env)
                     finally:
-                        envobj.save()
+                        env.save()
                     raise
 
             finally:
                 # Postprocess
                 try:
                     try:
-                        kvm_preprocessing.postprocess(self, params, envobj)
+                        kvm_preprocessing.postprocess(self, params, env)
                     except Exception, e:
                         if test_passed:
                             raise
                         logging.error("Exception raised during "
                                       "postprocessing: %s", e)
                 finally:
-                    envobj.save()
-                    logging.debug("Contents of environment: %s", envobj)
+                    env.save()
+                    logging.debug("Contents of environment: %s", env)
 
         except Exception, e:
             if params.get("abort_on_error") != "yes":
                 raise
             # Abort on error
             logging.info("Aborting job (%s)", e)
-            for vm in kvm_utils.env_get_all_vms(envobj):
+            for vm in kvm_utils.env_get_all_vms(env):
                 if vm.is_dead():
                     continue
                 logging.info("VM '%s' is alive.", vm.name)
