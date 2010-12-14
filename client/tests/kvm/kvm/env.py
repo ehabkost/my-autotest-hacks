@@ -9,10 +9,11 @@ class KvmEnv(UserDict.IterableUserDict):
     It behaves like a dictionary, but may implement
     additional common operations used by KVM tests.
     """
-    def __init__(self, d):
+    def __init__(self, d, filename=None):
         UserDict.IterableUserDict.__init__(self, d)
+        self._filename = filename
 
-    def dump(self, filename):
+    def _dump(self, filename):
         """
         Dump KVM test environment to a file.
 
@@ -21,6 +22,9 @@ class KvmEnv(UserDict.IterableUserDict):
         file = open(filename, "w")
         cPickle.dump(self.data, file)
         file.close()
+
+    def save(self):
+        return self._dump(self._filename)
 
 
 def _load_env(filename, version):
@@ -47,4 +51,4 @@ def _load_env(filename, version):
         return default
 
 def load(filename, version):
-    return KvmEnv(_load_env(filename, version))
+    return KvmEnv(_load_env(filename, version), filename)
