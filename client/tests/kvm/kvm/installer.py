@@ -617,6 +617,9 @@ def _installer_class(install_mode):
     return c
 
 def make_installer(test, params):
-    mode = params.get("mode")
+    # priority:
+    # - 'install_mode' param
+    # - 'mode' param
+    mode = params.get("install_mode", params.get("mode"))
     klass = _installer_class(mode)
     return klass(mode, test, params)
