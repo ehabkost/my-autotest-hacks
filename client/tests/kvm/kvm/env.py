@@ -12,6 +12,11 @@ class KvmEnv(UserDict.IterableUserDict):
     def __init__(self, d):
         UserDict.IterableUserDict.__init__(self, d)
 
+    def dump(self, filename):
+        """Save env to a file using pickle"""
+        dump_env(self.data, filename)
+
+
 def load_env(filename, version):
     """
     Load KVM test environment from an env file.

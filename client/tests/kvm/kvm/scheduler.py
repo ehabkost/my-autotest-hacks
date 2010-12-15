@@ -82,7 +82,7 @@ class scheduler:
                         obj.destroy()
                     elif isinstance(obj, kvm_subprocess.Spawn):
                         obj.close()
-                kvm.env.dump_env(env, env_filename)
+                envobj.dump(env_filename)
                 w.write("cleanup_done\n")
                 w.write("ready\n")
 
