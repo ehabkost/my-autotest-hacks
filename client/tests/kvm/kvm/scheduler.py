@@ -75,6 +75,8 @@ class scheduler:
             elif cmd[0] == "cleanup":
                 env_filename = os.path.join(self.bindir, self_dict["env"])
                 env = kvm.env.load_env(env_filename, {})
+                envobj = kvm.env.KvmEnv(env)
+                env = envobj.data # reference the KvmEnv object, as the original 'env' object won't be changed by KvmEnv
                 for obj in env.values():
                     if isinstance(obj, kvm_vm.VM):
                         obj.destroy()
