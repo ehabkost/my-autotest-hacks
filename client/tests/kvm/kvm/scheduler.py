@@ -76,7 +76,7 @@ class scheduler:
                 env_filename = os.path.join(self.bindir, self_dict["env"])
                 envobj = kvm.env.load(env_filename, {})
                 env = envobj.data # reference the KvmEnv object, as the original 'env' object won't be changed by KvmEnv
-                for obj in env.values():
+                for obj in envobj.values():
                     if isinstance(obj, kvm_vm.VM):
                         obj.destroy()
                     elif isinstance(obj, kvm_subprocess.Spawn):
