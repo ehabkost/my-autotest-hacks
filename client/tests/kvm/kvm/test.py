@@ -74,7 +74,7 @@ class KvmTest(test.test):
                     # Run the test function
                     run_func = getattr(test_module, "run_%s" % t_type)
                     try:
-                        run_func(self, params, env)
+                        run_func(self, params, envobj)
                     finally:
                         kvm_utils.dump_env(env, env_filename)
                     test_passed = True
