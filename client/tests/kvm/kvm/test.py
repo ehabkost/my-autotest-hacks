@@ -1,7 +1,7 @@
 import sys, os, time, logging, imp
 from autotest_lib.client.bin import test
 from autotest_lib.client.common_lib import error
-import kvm_utils, kvm_preprocessing
+import kvm_utils, kvm_preprocessing, kvm.env
 
 
 class KvmTest(test.test):
@@ -40,7 +40,11 @@ class KvmTest(test.test):
         logging.info("Unpickling env. You may see some harmless error "
                      "messages.")
         env_filename = os.path.join(self.bindir, params.get("env", "env"))
+
         env = kvm_utils.load_env(env_filename, self.env_version)
+        envobj = kvm.env.KvmEnv(env)
+        env = envobj.data # reference the dict kept by KvmEnv, as the original 'env' dict won't be changed by KvmEnv
+
         logging.debug("Contents of environment: %s", env)
 
         test_passed = False
