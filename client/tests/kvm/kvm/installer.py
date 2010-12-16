@@ -4,7 +4,6 @@ from autotest_lib.client.bin import utils, test, os_dep
 from autotest_lib.client.common_lib import error
 import kvm_utils
 
-
 def check_configure_options(script_path):
     """
     Return the list of available options (flags) of a given kvm configure build
@@ -163,6 +162,15 @@ def save_build(build_dir, dest_dir):
     os.chdir(os.path.dirname(build_dir))
     utils.system('tar -cjf %s %s' % (tarball_name, base_name))
     shutil.move(tarball_name, os.path.join(dest_dir, tarball_name))
+
+class KvmInstallException(Exception):
+    pass
+
+class FailedKvmInstall(KvmInstallException):
+    pass
+
+class KvmNotInstalled(KvmInstallException):
+    pass
 
 
 class BaseInstaller(object):
@@ -707,6 +715,18 @@ class PreInstalledKvm(BaseInstaller):
 
     # load_modules() will use the stock modules:
     load_stock_modules = True
+
+class FailedInstaller:
+    """Class used to be returned instead of the installer if a installation fails
+
+    Useful to make sure no installer object is used if KVM installation fails.
+    """
+    def __init__(self, msg="KVM install failed"):
+        self._msg = msg
+
+    def load_modules(self):
+        """Will refuse to load the KVM modules as install failed"""
+        raise FailedKvmInstall("KVM modules not available. reason: %s" % (self._msg))
 
 installer_classes = {
     'localsrc':SourceDirInstaller,

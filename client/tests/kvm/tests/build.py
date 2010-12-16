@@ -12,7 +12,14 @@ def run_build(test, params, env):
     srcdir = params.get("srcdir", test.srcdir)
     params["srcdir"] = srcdir
 
-    installer = kvm.installer.make_installer(params)
-    installer.set_install_params(test, params)
-    installer.install()
-    env.register_installer(installer)
+    try:
+        installer = kvm.installer.make_installer(params)
+        installer.set_install_params(test, params)
+        installer.install()
+        env.register_installer(installer)
+    except Exception,e:
+        # if the build/install fails, don't allow other tests
+        # to get a installer.
+        msg = "KVM install failed: %s" % (e)
+        env.register_installer(kvm.installer.FailedInstaller(msg))
+        raise
