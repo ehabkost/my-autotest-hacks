@@ -458,10 +458,6 @@ class SourceDirInstaller(BaseInstaller):
 
 
 class GitInstaller(SourceDirInstaller):
-    def __init__(self, mode, test, params):
-        super(GitInstaller, self).__init__(mode, test, params)
-
-
     def _pull_code(self):
         """
         Retrieves code from git repositories.
