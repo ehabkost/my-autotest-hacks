@@ -653,7 +653,7 @@ def _installer_class(install_mode):
                               ' install mode: %s' % install_mode)
     return c
 
-def make_installer(test, params):
+def make_installer(params):
     # priority:
     # - 'install_mode' param
     # - 'mode' param
