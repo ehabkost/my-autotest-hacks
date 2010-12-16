@@ -167,6 +167,7 @@ def save_build(build_dir, dest_dir):
 
 class BaseInstaller(object):
     def __init__(self, mode, test, params):
+        self.install_mode = mode
         self.params = params
 
         load_modules = params.get('load_modules', 'no')
@@ -351,19 +352,19 @@ class SourceDirInstaller(BaseInstaller):
     Class that handles building/installing KVM directly from a tarball or
     a single source code dir.
     """
-    def __init__(self, install_mode, test, params):
+    def __init__(self, mode, test, params):
         """
         Initializes class attributes, and retrieves KVM code.
 
         @param test: kvm test object
         @param params: Dictionary with test arguments
         """
-        super(SourceDirInstaller, self).__init__(install_mode, test, params)
+        super(SourceDirInstaller, self).__init__(mode, test, params)
 
         srcdir = params.get("srcdir", None)
         self.path_to_roms = params.get("path_to_rom_images", None)
 
-        if install_mode == 'localsrc':
+        if self.install_mode == 'localsrc':
             if srcdir is None:
                 raise error.TestError("Install from source directory specified"
                                       "but no source directory provided on the"
@@ -371,7 +372,7 @@ class SourceDirInstaller(BaseInstaller):
             else:
                 shutil.copytree(srcdir, self.srcdir)
 
-        if install_mode == 'release':
+        if self.install_mode == 'release':
             release_tag = params.get("release_tag")
             release_dir = params.get("release_dir")
             release_listing = params.get("release_listing")
@@ -384,7 +385,7 @@ class SourceDirInstaller(BaseInstaller):
             logging.info("Retrieving release kvm-%s" % release_tag)
             tarball = utils.unmap_url("/", tarball, "/tmp")
 
-        elif install_mode == 'snapshot':
+        elif self.install_mode == 'snapshot':
             logging.info("Installing KVM from snapshot")
             snapshot_dir = params.get("snapshot_dir")
             if not snapshot_dir:
@@ -400,7 +401,7 @@ class SourceDirInstaller(BaseInstaller):
             logging.info("Retrieving kvm-snapshot-%s" % d)
             tarball = utils.unmap_url("/", tarball, "/tmp")
 
-        elif install_mode == 'localtar':
+        elif self.install_mode == 'localtar':
             tarball = params.get("tarball")
             if not tarball:
                 raise error.TestError("KVM Tarball install specified but no"
@@ -409,10 +410,10 @@ class SourceDirInstaller(BaseInstaller):
             logging.info("Using tarball %s")
             tarball = utils.unmap_url("/", params.get("tarball"), "/tmp")
 
-        if install_mode in ['release', 'snapshot', 'localtar']:
+        if self.install_mode in ['release', 'snapshot', 'localtar']:
             utils.extract_tarball_to_dir(tarball, self.srcdir)
 
-        if install_mode in ['release', 'snapshot', 'localtar', 'srcdir']:
+        if self.install_mode in ['release', 'snapshot', 'localtar', 'srcdir']:
             self.repo_type = kvm_utils.check_kvm_source_dir(self.srcdir)
             configure_script = os.path.join(self.srcdir, 'configure')
             self.configure_options = check_configure_options(configure_script)
