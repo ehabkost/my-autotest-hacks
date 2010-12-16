@@ -166,8 +166,10 @@ def save_build(build_dir, dest_dir):
 
 
 class BaseInstaller(object):
-    def __init__(self, mode, test, params):
+    def __init__(self, mode):
         self.install_mode = mode
+
+    def set_install_params(self, test, params):
         self.params = params
 
         load_modules = params.get('load_modules', 'no')
@@ -250,8 +252,8 @@ class YumInstaller(BaseInstaller):
     """
     Class that uses yum to install and remove packages.
     """
-    def __init__(self, mode, test, params):
-        super(YumInstaller, self).__init__(mode, test, params)
+    def set_install_params(self, test, params):
+        super(YumInstaller, self).set_install_params(test, params)
         # Checking if all required dependencies are available
         os_dep.command("rpm")
         os_dep.command("yum")
@@ -308,14 +310,14 @@ class KojiInstaller(YumInstaller):
     Class that handles installing KVM from the fedora build service, koji.
     It uses yum to install and remove packages.
     """
-    def __init__(self, mode, test, params):
+    def set_install_params(self, test, params):
         """
         Gets parameters and initializes the package downloader.
 
         @param test: kvm test object
         @param params: Dictionary with test arguments
         """
-        super(KojiInstaller, self).__init__(mode, test, params)
+        super(KojiInstaller, self).set_install_params(test, params)
         default_koji_cmd = '/usr/bin/koji'
         default_src_pkg = 'qemu'
         self.src_pkg = params.get("src_pkg", default_src_pkg)
@@ -352,14 +354,14 @@ class SourceDirInstaller(BaseInstaller):
     Class that handles building/installing KVM directly from a tarball or
     a single source code dir.
     """
-    def __init__(self, mode, test, params):
+    def set_install_params(self, test, params):
         """
         Initializes class attributes, and retrieves KVM code.
 
         @param test: kvm test object
         @param params: Dictionary with test arguments
         """
-        super(SourceDirInstaller, self).__init__(mode, test, params)
+        super(SourceDirInstaller, self).set_install_params(test, params)
 
         srcdir = params.get("srcdir", None)
         self.path_to_roms = params.get("path_to_rom_images", None)
@@ -657,4 +659,4 @@ def make_installer(test, params):
     # - 'mode' param
     mode = params.get("install_mode", params.get("mode"))
     klass = _installer_class(mode)
-    return klass(mode, test, params)
+    return klass(mode)

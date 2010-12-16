@@ -13,4 +13,5 @@ def run_build(test, params, env):
     params["srcdir"] = srcdir
 
     installer = kvm.installer.make_installer(test, params)
+    installer.set_install_params(test, params)
     installer.install()
