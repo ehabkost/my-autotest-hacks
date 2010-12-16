@@ -77,3 +77,22 @@ class KvmEnvtest(unittest.TestCase):
 
         self.assertIs(e.get_vm('vm1'), vm1)
         self.assertIs(e.get_vm('vm2'), vm2)
+
+    def test_installer_register(self):
+        i1 = [1]
+        i2 = [2]
+
+        e = kvm.env.KvmEnv({})
+
+        e.register_installer(i1)
+        self.assertIs(e.previous_installer(), i1)
+
+        e.register_installer(i2)
+        self.assertIs(e.previous_installer(), i2)
+
+    def test_no_installer(self):
+        # in case there's no installe registered,
+        # KvmEnv should return None
+
+        e = kvm.env.KvmEnv({})
+        self.assertIs(e.previous_installer(), None)
