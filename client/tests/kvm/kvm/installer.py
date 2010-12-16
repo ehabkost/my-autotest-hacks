@@ -166,8 +166,9 @@ def save_build(build_dir, dest_dir):
 
 
 class BaseInstaller(object):
-    def __init__(self, mode):
+    def __init__(self, mode=None):
         self.install_mode = mode
+        self._full_module_list = None
 
     def set_install_params(self, test, params):
         self.params = params
@@ -212,6 +213,16 @@ class BaseInstaller(object):
         self._full_module_list = list(self._module_list())
 
 
+    def full_module_list(self):
+        """Return the module list used by the installer
+
+        Used by the module_probe test, to avoid using utils.unload_module().
+        """
+        if self._full_module_list is None:
+            raise KvmNotInstalled("KVM modules not installed yet (installer: %s)" % (type(self)))
+        return self._full_module_list
+
+
     # default value for load_stock argument
     load_stock_modules = True
 
@@ -229,12 +240,12 @@ class BaseInstaller(object):
 
         May be overridden by subclasses.
         """
-        _load_kvm_modules(self._full_module_list, load_stock=self.load_stock_modules)
+        _load_kvm_modules(self.full_module_list(), load_stock=self.load_stock_modules)
 
     def _unload_modules(self):
         """Just unload the KVM modules, without trying to kill Qemu
         """
-        _unload_kvm_modules(self._full_module_list)
+        _unload_kvm_modules(self.full_module_list())
 
     def unload_modules(self):
         """Kill Qemu and unload the KVM modules
@@ -448,7 +459,7 @@ class SourceDirInstaller(BaseInstaller):
 
 
     def load_modules(self):
-        _load_kvm_modules(self._full_module_list, module_dir=self.srcdir)
+        _load_kvm_modules(self.full_module_list(), module_dir=self.srcdir)
 
     def install(self):
         self._build()
@@ -610,12 +621,12 @@ class GitInstaller(SourceDirInstaller):
 
     def load_modules(self):
         if self.kmod_srcdir:
-            _load_kvm_modules(self._full_module_list, module_dir=self.kmod_srcdir)
+            _load_kvm_modules(self.full_module_list(), module_dir=self.kmod_srcdir)
         elif self.kernel_srcdir:
-            _load_kvm_modules(self._full_module_list, module_dir=self.userspace_srcdir)
+            _load_kvm_modules(self.full_module_list(), module_dir=self.userspace_srcdir)
         else:
             logging.info("Loading stock KVM modules")
-            _load_kvm_modules(self._full_module_list, load_stock=True)
+            _load_kvm_modules(self.full_module_list(), load_stock=True)
 
 
     def install(self):
