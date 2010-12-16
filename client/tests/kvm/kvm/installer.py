@@ -235,12 +235,17 @@ class BaseInstaller(object):
             for module in self.extra_modules:
                 yield module
 
-    def load_modules(self):
+    def _load_modules(self, mod_list):
         """Load the KVM modules
 
         May be overridden by subclasses.
         """
-        _load_kvm_modules(self.full_module_list(), load_stock=self.load_stock_modules)
+        _load_kvm_modules(mod_list, load_stock=self.load_stock_modules)
+
+    def load_modules(self, mod_list=None):
+        if mod_list is None:
+            mod_list = self.full_module_list()
+        self._load_modules(mod_list)
 
     def _unload_modules(self):
         """Just unload the KVM modules, without trying to kill Qemu
@@ -458,8 +463,8 @@ class SourceDirInstaller(BaseInstaller):
         create_symlinks(self.test_bindir, self.prefix)
 
 
-    def load_modules(self):
-        _load_kvm_modules(self.full_module_list(), module_dir=self.srcdir)
+    def _load_modules(self, mod_list):
+        _load_kvm_modules(mod_list, module_dir=self.srcdir)
 
     def install(self):
         self._build()
@@ -619,14 +624,14 @@ class GitInstaller(SourceDirInstaller):
                         unittest=self.unittest_prefix)
 
 
-    def load_modules(self):
+    def _load_modules(self, mod_list):
         if self.kmod_srcdir:
-            _load_kvm_modules(self.full_module_list(), module_dir=self.kmod_srcdir)
+            _load_kvm_modules(mod_list, module_dir=self.kmod_srcdir)
         elif self.kernel_srcdir:
-            _load_kvm_modules(self.full_module_list(), module_dir=self.userspace_srcdir)
+            _load_kvm_modules(mod_list, module_dir=self.userspace_srcdir)
         else:
             logging.info("Loading stock KVM modules")
-            _load_kvm_modules(self.full_module_list(), load_stock=True)
+            _load_kvm_modules(mod_list, load_stock=True)
 
 
     def install(self):
@@ -644,7 +649,6 @@ class PreInstalledKvm(BaseInstaller):
 
     # load_modules() will use the stock modules:
     load_stock_modules = True
-
 
 installer_classes = {
     'localsrc':SourceDirInstaller,
