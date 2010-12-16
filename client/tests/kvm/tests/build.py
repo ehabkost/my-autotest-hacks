@@ -15,3 +15,4 @@ def run_build(test, params, env):
     installer = kvm.installer.make_installer(params)
     installer.set_install_params(test, params)
     installer.install()
+    env.register_installer(installer)
