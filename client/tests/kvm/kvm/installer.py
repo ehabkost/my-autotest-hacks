@@ -266,6 +266,10 @@ class BaseInstaller(object):
         self.unload_modules()
         self.load_modules()
 
+    def reload_modules_if_needed(self):
+        if self.should_load_modules:
+            self.reload_modules()
+
 class YumInstaller(BaseInstaller):
     """
     Class that uses yum to install and remove packages.
@@ -317,8 +321,7 @@ class YumInstaller(BaseInstaller):
         self._install_packages()
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
-        if self.should_load_modules:
-            self.reload_modules()
+        self.reload_modules_if_needed()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -361,8 +364,7 @@ class KojiInstaller(YumInstaller):
         super(KojiInstaller, self)._install_packages()
         create_symlinks(test_bindir=self.test_bindir,
                         bin_list=self.qemu_bin_paths)
-        if self.should_load_modules:
-            self.reload_modules()
+        self.reload_modules_if_needed()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -471,8 +473,7 @@ class SourceDirInstaller(BaseInstaller):
     def install(self):
         self._build()
         self._install()
-        if self.should_load_modules:
-            self.reload_modules()
+        self.reload_modules_if_needed()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
@@ -640,8 +641,7 @@ class GitInstaller(SourceDirInstaller):
         self._pull_code()
         self._build()
         self._install()
-        if self.should_load_modules:
-            self.reload_modules()
+        self.reload_modules_if_needed()
         if self.save_results:
             save_build(self.srcdir, self.results_dir)
 
