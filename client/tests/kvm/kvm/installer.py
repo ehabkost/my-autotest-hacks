@@ -344,15 +344,15 @@ class KojiInstaller(YumInstaller):
         self.src_pkg = params.get("src_pkg", default_src_pkg)
         self.tag = params.get("koji_tag", None)
         self.build = params.get("koji_build", None)
-        koji_cmd = params.get("koji_cmd", default_koji_cmd)
-        self.downloader = kvm_utils.KojiDownloader(cmd=koji_cmd)
+        self.koji_cmd = params.get("koji_cmd", default_koji_cmd)
 
 
     def _get_packages(self):
         """
         Downloads the specific arch RPMs for the specific build name.
         """
-        self.downloader.get(src_package=self.src_pkg, tag=self.tag,
+        downloader = kvm_utils.KojiDownloader(cmd=self.koji_cmd)
+        downloader.get(src_package=self.src_pkg, tag=self.tag,
                             build=self.build, dst_dir=self.srcdir)
 
 
