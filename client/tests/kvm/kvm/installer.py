@@ -247,16 +247,18 @@ class BaseInstaller(object):
             mod_list = self.full_module_list()
         self._load_modules(mod_list)
 
-    def _unload_modules(self):
+    def _unload_modules(self, mod_list=None):
         """Just unload the KVM modules, without trying to kill Qemu
         """
-        _unload_kvm_modules(self.full_module_list())
+        if mod_list is None:
+            mod_list = self.full_module_list()
+        _unload_kvm_modules(mod_list)
 
-    def unload_modules(self):
+    def unload_modules(self, mod_list=None):
         """Kill Qemu and unload the KVM modules
         """
         kill_qemu_processes()
-        self._unload_modules()
+        self._unload_modules(mod_list)
 
     def reload_modules(self):
         """Reload the KVM modules after killing Qemu and unloading the current modules
