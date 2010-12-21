@@ -383,6 +383,9 @@ class SourceDirInstaller(BaseInstaller):
         """
         super(SourceDirInstaller, self).set_install_params(test, params)
 
+        self.mod_install_dir = os.path.join(self.prefix, 'modules')
+        self.installed_kmods = False  # it will be set to True in case we installed our own modules
+
         srcdir = params.get("srcdir", None)
         self.path_to_roms = params.get("path_to_rom_images", None)
 
@@ -455,11 +458,49 @@ class SourceDirInstaller(BaseInstaller):
             utils.system(step)
 
 
+    def _install_kmods_old_userspace(self, userspace_path):
+        """Run the module install command
+
+        This is for the "old userspace" code, that contained a 'kernel' subdirectory
+        with the kmod build code.
+
+        The code would be much simpler if we could specify the module install
+        path as parameter to the toplevel Makefile. As we can't do that and
+        the module install code doesn't use --prefix, we have to call
+        'make -C kernel install' directly, setting the module directory
+        parameters.
+
+        If the userspace tree doens't have a 'kernel' subdirectory, the
+        module install step will be skipped.
+
+        @param userspace_path: the path the kvm-userspace directory
+        """
+        kdir = os.path.join(userspace_path, 'kernel')
+        if os.path.isdir(kdir):
+            os.chdir(kdir)
+            # INSTALLDIR is the target dir for the modules
+            # ORIGMODDIR is the dir where the old modules will be removed. we
+            #            don't want to mess with the system modules, so set it
+            #            to a non-existing directory
+            utils.system('make install INSTALLDIR=%s ORIGMODDIR=/tmp/no-old-modules' % (self.mod_install_dir))
+            self.installed_kmods = True
+
+    def _install_kmods(self, kmod_path):
+        """Run the module install command for the kmod-kvm repository
+
+        @param kmod_path: the path to the kmod-kvm.git working copy
+        """
+        os.chdir(kmod_path)
+        utils.system('make modules_install DESTDIR=%s' % (self.mod_install_dir))
+        self.installed_kmods = True
+
+
     def _install(self):
         os.chdir(self.srcdir)
         logging.info("Installing KVM userspace")
         if self.repo_type == 1:
             utils.system("make -C qemu install")
+            self._install_kmods_old_userspace(self.srcdir)
         elif self.repo_type == 2:
             utils.system("make install")
         if self.path_to_roms:
@@ -468,7 +509,14 @@ class SourceDirInstaller(BaseInstaller):
 
 
     def _load_modules(self, mod_list):
-        _load_kvm_modules(mod_list, module_dir=self.srcdir)
+        # load the installed KVM modules in case we installed them
+        # ourselves. Otherwise, just load the system modules.
+        if self.installed_kmods:
+            logging.info("Loading installed KVM modules")
+            _load_kvm_modules(mod_list, module_dir=self.mod_install_dir)
+        else:
+            logging.info("Loading stock KVM modules")
+            _load_kvm_modules(mod_list, load_stock=True)
 
     def install(self):
         self._build()
@@ -618,23 +666,31 @@ class GitInstaller(SourceDirInstaller):
 
 
     def _install(self):
-        os.chdir(self.userspace_srcdir)
-        utils.system('make install')
+        if self.kernel_srcdir:
+            os.chdir(self.userspace_srcdir)
+            # the kernel module install with --prefix doesn't work, and DESTDIR
+            # wouldn't work for the userspace stuff, so we clear WANT_MODULE:
+            utils.system('make install WANT_MODULE=')
+            # and install the old-style-kmod modules manually:
+            self._install_kmods_old_userspace(self.userspace_srcdir)
+        elif self.kmod_srcdir:
+            # if we have a kmod repository, it is easier:
+            # 1) install userspace:
+            os.chdir(self.userspace_srcdir)
+            utils.system('make install')
+            # 2) install kmod:
+            self._install_kmods(self.kmod_srcdir)
+        else:
+            # if we don't have kmod sources, we just install
+            # userspace:
+            os.chdir(self.userspace_srcdir)
+            utils.system('make install')
+
         if self.path_to_roms:
             install_roms(self.path_to_roms, self.prefix)
         create_symlinks(test_bindir=self.test_bindir, prefix=self.prefix,
                         bin_list=None,
                         unittest=self.unittest_prefix)
-
-
-    def _load_modules(self, mod_list):
-        if self.kmod_srcdir:
-            _load_kvm_modules(mod_list, module_dir=self.kmod_srcdir)
-        elif self.kernel_srcdir:
-            _load_kvm_modules(mod_list, module_dir=self.userspace_srcdir)
-        else:
-            logging.info("Loading stock KVM modules")
-            _load_kvm_modules(mod_list, load_stock=True)
 
 
     def install(self):
