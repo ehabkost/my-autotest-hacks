@@ -32,6 +32,9 @@ def run_module_probe(test, params, env):
         mod_list = installer.full_module_list()
         logging.debug("mod list from installer: %r", mod_list)
 
+    # unload the modules before starting:
+    installer._unload_modules(mod_list)
+
     load_count = int(params.get("load_count", 100))
     try:
         for i in range(load_count):
